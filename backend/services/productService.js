@@ -15,6 +15,30 @@ let products = [
         description: 'Latest smartphone',
         category: 'Electronics',
         stock: 20
+    },
+    {
+        id: 3,
+        name: 'Headphones',
+        price: 100,
+        description: 'Wireless headphones',
+        category: 'Accessories',
+        stock: 15
+    },
+    {
+        id: 4,
+        name: 'Mouse',
+        price: 50,
+        description: 'Gaming mouse',
+        category: 'Accessories',
+        stock: 30
+    },
+    {
+        id: 5,
+        name: 'Keyboard',
+        price: 150,
+        description: 'Mechanical keyboard',
+        category: 'Accessories',
+        stock: 25
     }
 ];
 
