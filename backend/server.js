@@ -25,6 +25,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan('combined'));
 
+// Debug middleware
+app.use((req, res, next) => {
+    console.log('\n=== New Request ===');
+    console.log(`Time: ${new Date().toISOString()}`);
+    console.log(`Method: ${req.method}`);
+    console.log(`URL: ${req.url}`);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    next();
+});
+
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -33,6 +44,7 @@ app.use('/api', routes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+    console.error('\n=== Error ===');
     console.error(err.stack);
     res.status(500).json({
         success: false,
@@ -43,6 +55,8 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(port, () => {
+    console.log('\n=== Server Started ===');
     console.log(`Server is running on port ${port}`);
     console.log(`API endpoints are available at http://localhost:${port}/api`);
+    console.log('Waiting for requests...\n');
 }); 
