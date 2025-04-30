@@ -49,8 +49,18 @@ const trainerMiddleware = (req, res, next) => {
   next();
 };
 
+const staffMiddleware = (req, res, next) => {
+  if (req.user.role !== 'staff') {
+    return res.status(403).json({ message: 'Không có quyền truy cập' });
+  }
+  next();
+};
+
+
+
 module.exports = {
   authMiddleware,
   adminMiddleware,
-  trainerMiddleware
+  trainerMiddleware,
+  staffMiddleware
 }; 
