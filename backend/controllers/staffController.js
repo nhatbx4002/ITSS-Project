@@ -1,3 +1,5 @@
+
+const staffService = require('../services/staffService');
 const StaffService = require('../services/staffService')
 
 class StaffControllers {
@@ -22,8 +24,7 @@ class StaffControllers {
     }
     async getMembersById(req,res){
         try{
-            const memberId = req.parrams.id;
-            const member = await StaffService.getMemberById(memberId);
+            const member = await staffService.getMemberById(req.params.id);
             res.status(200).json({
                 success: 'true',
                 member : member
@@ -41,6 +42,104 @@ class StaffControllers {
         }
     }
 
+    async deleteMemberById(req,res){
+        try{
+            const deleteMemberById = await staffService.deleteMember(req.params.id);
+            res.status(200).json({
+                success : "true",
+                message : "delete members successfully",
+            })
+
+        }catch(error){
+            console.log(error);
+            res.status(404).json({
+                success : false,
+                message : "can not find members by Id",
+                error : error
+            })
+            
+        }
+    }
+
+    async respondToFeedback(req,res){
+        try{
+            const updatedFeedback = await staffService.respondToFeedBack(req.params.id,req.body.response);
+            res.status(200).json({
+                success : true,
+                message : "Feedback responded successfully",
+                data : updatedFeedback
+            })
+            
+
+        }catch(error){
+            console.log(error);
+            res.status(404).json({
+                success : false,
+                message : "Failed to respond to feedback",
+                error : error.message
+            })
+            
+        }
+    }
+
+    async getWorkoutHistory(req,res){
+        try{
+            const workout = await staffService.getWorkoutHistory(req.params.id);
+            res.status(200).json({
+                success : true,
+                data : workout
+            })
+
+        }catch(error){
+            console.log(error);
+            res.status(404).json({
+                success : false,
+                message : "failed to get workout history",
+                error : error
+            })
+            
+        }
+    }
+    
+
+    async registerSubscription (req,res){
+        try{
+            const subsciption = await staffService.registerSubsciptionService(req.body);
+            res.status(200).json({
+                success : true,
+                message : "Subscription registered successfully",
+                data : subsciption
+            })
+
+        }catch(error){
+            console.log(error);
+            res.status(404).json({
+                success : false,
+                message: "An error occurred while register the subscription"
+            })
+            
+        }
+    }
+
+    async updateMemberSubscription (req,res) {
+        try{
+            const updatedSuscription = await staffService.updateMemberSubscription(req.params.id,req.body);
+            
+            res.status(200).json({
+                success : true,
+                message : "Subscription updated successfully",
+                data : updatedSuscription
+            })
+        }catch(error){
+            console.log(error);
+            res.status(404).json({
+                success : false, 
+                error : error
+            })
+            
+        }
+        
+    }
 }
 
 module.exports = new StaffControllers();

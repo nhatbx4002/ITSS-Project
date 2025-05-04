@@ -5,6 +5,8 @@ const FeedbackSchema = new mongoose.Schema({
   gym_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Gym', required: true },
   rating: { type: Number, min: 1, max: 5 },
   comment: { type: String },
+  response: { type: String }, 
+  response_at: { type: Date },
   created_at: { type: Date, default: Date.now }
 });
 
