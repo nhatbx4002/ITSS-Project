@@ -5,10 +5,12 @@ const router = express.Router();
 const productRoutes = require('./productRoutes');
 const userRoutes = require('./userRoutes');
 const subscriptionRoutes = require('./subscriptionRoutes');
+const feedbackRoutes = require('./feedbacksRoutes');
 
 // Use routes
 router.use('/products', productRoutes);
 router.use('/user', userRoutes);
 router.use('/subscription', subscriptionRoutes);
+router.use('/feedback', feedbackRoutes);
 
 module.exports = router; 
