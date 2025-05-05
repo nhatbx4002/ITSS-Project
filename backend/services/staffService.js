@@ -3,14 +3,7 @@ const Feedback = require("../models/feedbackModel");
 const Workout = require("../models/workoutModel");
 const Subscription = require('../models/subscriptionModel');
 const Membership = require('../models/membershipModel ');
-const moment = require('moment'); 
 
-function calculateDurationInDays(start_date, end_date) {
-    const start = new Date(start_date);
-    const end = new Date(end_date);
-    const diffTime = Math.abs(end - start);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
 
 const validMemberships = [
     { type: 'vip', duration: 30, price: 42 },
@@ -49,40 +42,73 @@ class StaffService {
             {new : true}
         );
     }
-    async getWorkoutHistory(id){
-        return await Workout.find({user_id : id});
+    async getWorkoutHistory(user_id, updatePayload){
+        return await Workout.find(user_id);
     }
-    async registerSubsciptionService(user_id, membership_id, start_date){
+    async registerSubscriptionService(user_id, updatePayload) {
         const user = await User.findById(user_id);
-        if(!user)throw new error("User not found!");
-        if(user.role !== 'member')throw new error("Only members can register for a subsciption");
-
-        const membership = await Membership.findById(membership_id);
-        if(!merbership)throw new error("Membership not found");
-
-        const exstingSub = await Subscription.findOne({user_id, status : 'active'});
-        if(exstingSub)throw new error("User already has an active subsciption");
-
-        const startDate = new Date(start_date);
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + membership.duration);
-
-        const newSub = newSubscription({
+        if (!user) throw new Error('Người dùng không tồn tại');
+        if (user.role !== 'member') throw new Error('Chỉ thành viên (member) mới được đăng ký gói tập');
+    
+        const existingSub = await Subscription.findOne({ user_id, status: 'active' });
+        if (existingSub) throw new Error('Người dùng đã có gói tập đang hoạt động');
+    
+        const { type, duration, status = 'active', name } = updatePayload;
+    
+        let finalMembershipId;
+        let finalPrice;
+    
+        if (type && duration) {
+            const parsedDuration = parseInt(duration);
+    
+            const membershipMatch = validMemberships.find(
+                m => m.type === type && m.duration === parsedDuration
+            );
+    
+            if (!membershipMatch) throw new Error(`Không tìm thấy gói tập phù hợp với type: ${type} và duration: ${parsedDuration}`);
+    
+            finalPrice = membershipMatch.price;
+    
+            let membership = await Membership.findOne({ type, duration: parsedDuration });
+    
+            if (!membership) {
+                membership = await Membership.create({
+                    type,
+                    name: name || type,
+                    duration: parsedDuration,
+                    price: finalPrice
+                });
+            } else {
+                if (name) membership.name = name;
+                membership.price = finalPrice;
+                await membership.save();
+            }
+    
+            finalMembershipId = membership._id;
+        } else {
+            throw new Error('Thiếu thông tin type và duration của gói tập');
+        }
+    
+        const start_date = new Date();
+        const end_date = new Date(start_date);
+        end_date.setDate(start_date.getDate() + parseInt(duration));
+    
+        const newSubscription = new Subscription({
             user_id,
-            membership_id,
-            start_date : startDate,
-            end_date : endDate,
-            status : 'active',
-        })
-
-        await newSub.save();
-        user.membership_expiry_date = endDate;
-         
-        return newSub;
-
-
-
+            membership_id: finalMembershipId,
+            start_date,
+            end_date,
+            status
+        });
+    
+        await newSubscription.save();
+    
+        user.membership_expiry_date = end_date;
+        await user.save();
+    
+        return newSubscription;
     }
+    
 
 
     async updateMemberSubscription(subscriptionId, updatePayload) {

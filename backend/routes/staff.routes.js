@@ -11,7 +11,12 @@ router
 router.put('/feedback/:id/response',StaffControllers.respondToFeedback);
 router.get('/workout/:id',StaffControllers.getWorkoutHistory);
 
-router.put('/subscriptions/:id',StaffControllers.updateMemberSubscription);
+router.put('/subscriptions/:id',StaffControllers.updateMemberSubscription)
+
+router.post('/registerSubscription/:id',StaffControllers.registerSubscription)
+
+
+
 
 
 

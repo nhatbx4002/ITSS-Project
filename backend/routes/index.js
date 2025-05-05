@@ -8,5 +8,4 @@ const productRoutes = require('./productRoutes');
 router.use('/products', productRoutes);
 
 router.use('/staff',require('../routes/staff.routes'));
-router.use('/auth',require('../routes/auth.routes'));
 module.exports = router; 

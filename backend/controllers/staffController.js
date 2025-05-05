@@ -1,5 +1,4 @@
 
-const staffService = require('../services/staffService');
 const StaffService = require('../services/staffService')
 
 class StaffControllers {
@@ -63,7 +62,7 @@ class StaffControllers {
 
     async respondToFeedback(req,res){
         try{
-            const updatedFeedback = await staffService.respondToFeedBack(req.params.id,req.body.response);
+            const updatedFeedback = await StaffService.respondToFeedBack(req.params.id,req.body.response);
             res.status(200).json({
                 success : true,
                 message : "Feedback responded successfully",
@@ -101,14 +100,13 @@ class StaffControllers {
         }
     }
     
-
     async registerSubscription (req,res){
         try{
-            const subsciption = await staffService.registerSubsciptionService(req.body);
+            const subscription = await StaffService.registerSubscriptionService(req.params.id, req.body);
             res.status(200).json({
                 success : true,
                 message : "Subscription registered successfully",
-                data : subsciption
+                data : subscription
             })
 
         }catch(error){
@@ -123,7 +121,7 @@ class StaffControllers {
 
     async updateMemberSubscription (req,res) {
         try{
-            const updatedSuscription = await staffService.updateMemberSubscription(req.params.id,req.body);
+            const updatedSuscription = await StaffService.updateMemberSubscription(req.params.id,req.body);
             console.log(req.params.id);
             console.log(req.body);
             res.status(200).json({
