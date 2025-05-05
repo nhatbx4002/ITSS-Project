@@ -3,6 +3,7 @@ const Feedback = require("../models/feedbackModel");
 const Workout = require("../models/workoutModel");
 const Subscription = require('../models/subscriptionModel');
 const Membership = require('../models/membershipModel ');
+const moment = require('moment'); 
 
 function calculateDurationInDays(start_date, end_date) {
     const start = new Date(start_date);
@@ -10,6 +11,23 @@ function calculateDurationInDays(start_date, end_date) {
     const diffTime = Math.abs(end - start);
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
+
+const validMemberships = [
+    { type: 'vip', duration: 30, price: 42 },
+    { type: 'vip', duration: 90, price: 113 },
+    { type: 'vip', duration: 180, price: 208 },
+    { type: 'vip', duration: 365, price: 375 },
+
+    { type: 'standard', duration: 30, price: 25 },
+    { type: 'standard', duration: 90, price: 63 },
+    { type: 'standard', duration: 180, price: 113 },
+    { type: 'standard', duration: 365, price: 208 },
+
+    { type: 'personal_training', duration: 30, price: 84 },
+    { type: 'personal_training', duration: 90, price: 229 },
+    { type: 'personal_training', duration: 180, price: 417 },
+    { type: 'personal_training', duration: 365, price: 750 },
+];
 
 class StaffService {
     async getAllMembers(){
@@ -66,52 +84,71 @@ class StaffService {
 
     }
 
-    async  updateMemberSubscription(subscriptionId, updatePayload) {
-        const {type, membership_id, start_date, end_date,status, name, price } = updatePayload;
+
+    async updateMemberSubscription(subscriptionId, updatePayload) {
+        console.log('subscriptionId:', subscriptionId);
+        const { type, duration, status, name } = updatePayload;
     
-        let finalMembershipId = membership_id;
+        let finalMembershipId;
+        let finalPrice;
     
-        
-        if (!membership_id && type) {
-            const membership = await Membership.findOne({ type });
-            if (!membership) throw new Error(`Không tìm thấy membership với type: ${type}`);
+        if (type && duration) {
+            const parsedDuration = parseInt(duration);
+            const membershipMatch = validMemberships.find(
+                m => m.type === type && m.duration === parsedDuration
+            );
+    
+            if (!membershipMatch) {
+                throw new Error(`Không tồn tại gói tập với type: ${type} và duration: ${parsedDuration}`);
+            }
+    
+            finalPrice = membershipMatch.price;
+            let membership = await Membership.findOne({ type, duration: parsedDuration });
+    
+            if (!membership) {
+                membership = await Membership.create({
+                    type,
+                    name: name || type,
+                    duration: parsedDuration,
+                    price: finalPrice
+                });
+            } else {
+                if (name) membership.name = name;
+                membership.price = finalPrice;
+                await membership.save();
+            }
+    
             finalMembershipId = membership._id;
         }
     
-        
-        if (finalMembershipId && (name || price)) {
-            const membershipToUpdate = await Membership.findById(finalMembershipId);
-            if (!membershipToUpdate) throw new Error('Membership không tồn tại để cập nhật');
+        const start_date = new Date();
+        const end_date = new Date(start_date);
     
-            if (name) membershipToUpdate.name = name;
-            if (price) membershipToUpdate.price = price;
-    
-            await membershipToUpdate.save();
+        if (duration) {
+            const parsedDuration = parseInt(duration);
+            end_date.setDate(start_date.getDate() + parsedDuration);
         }
     
-        
-        let duration = undefined;
-        if (start_date && end_date) {
-            duration = calculateDurationInDays(start_date, end_date);
-    
-            if (finalMembershipId) {
-                await Membership.findByIdAndUpdate(finalMembershipId, { duration });
-            }
-        }
+        const existingSub = await Subscription.findById(subscriptionId);
+        console.log("Found subscription:", existingSub);
     
         const updatedSubscription = await Subscription.findByIdAndUpdate(
             subscriptionId,
             {
                 ...(finalMembershipId && { membership_id: finalMembershipId }),
-                ...(start_date && { start_date }),
-                ...(end_date && { end_date }),
-                ...(status && { status }),
+                start_date,
+                end_date,
+                ...(status && { status })
             },
             { new: true }
         );
     
         return updatedSubscription;
     }
+    
+    
+
+    
 
 }
 
