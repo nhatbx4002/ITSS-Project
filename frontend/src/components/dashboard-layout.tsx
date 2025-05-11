@@ -3,7 +3,7 @@
 import type React from "react"
 import { Bell } from "lucide-react"
 import Image from "next/image"
-import Sidebar from "@/components/sidebar"
+import Sidebar from "@/components/sidebar/sidebar"
 import { Button } from "@/components/ui/button"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -22,14 +22,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="mr-2"
             />
             <h1 className="text-2xl font-bold text-[#1a1a6c]">STAMINA FITNESS</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" className="text-[#1a1a6c] cursor-pointer">
-              Feedback
-            </Button>
-            <Button variant="ghost" size="icon" className="text-[#1a1a6c] cursor-pointer">
-              <Bell className="h-5 w-5" />
-            </Button>
           </div>
         </header>
 

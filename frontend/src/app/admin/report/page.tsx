@@ -30,7 +30,7 @@ export default function SalesReportPage() {
       plan: "1 Month - PT",
       month: "JAN",
       datePaid: "10-01-2023",
-      amount: 200000,
+      amount: 200,
     },
     {
       id: 2,
@@ -39,7 +39,7 @@ export default function SalesReportPage() {
       plan: "6 Months - PT",
       month: "JAN",
       datePaid: "10-01-2023",
-      amount: 1000000,
+      amount: 1000,
     },
     {
       id: 3,
@@ -48,7 +48,7 @@ export default function SalesReportPage() {
       plan: "1 Month - M",
       month: "JAN",
       datePaid: "10-01-2023",
-      amount: 200000,
+      amount: 200,
     },
     {
       id: 4,
@@ -57,7 +57,7 @@ export default function SalesReportPage() {
       plan: "3 Months",
       month: "JAN",
       datePaid: "10-01-2023",
-      amount: 500000,
+      amount: 500,
     },
   ]
 
@@ -106,7 +106,7 @@ export default function SalesReportPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium">Total</label>
-              <div className="h-10 flex items-center px-3 font-bold text-lg">{totalAmount.toLocaleString()} VND</div>
+              <div className="h-10 flex items-center px-3 font-bold text-lg">{totalAmount.toLocaleString()} $</div>
             </div>
           </div>
         </CardContent>
@@ -169,7 +169,7 @@ export default function SalesReportPage() {
                     <td className="py-3 px-4">{record.plan}</td>
                     <td className="py-3 px-4">{record.month}</td>
                     <td className="py-3 px-4">{record.datePaid}</td>
-                    <td className="py-3 px-4">{record.amount.toLocaleString()} VND</td>
+                    <td className="py-3 px-4">{record.amount.toLocaleString()} $</td>
                   </tr>
                 ))}
               </tbody>

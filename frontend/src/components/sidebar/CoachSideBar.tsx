@@ -28,20 +28,16 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
-    { icon: User, label: "Admin Profile", href: "/admin/admin-profile" },
-    { icon: ClipboardList, label: "Registration", href: "/admin/registration" },
-    { icon: FileText, label: "Plan", href: "/admin/plan" },
-    { icon: CreditCard, label: "Payment", href: "/admin/payment" },
-    { icon: Package, label: "Inventory", href: "/admin/inventory" },
-    { icon: Users, label: "View Members", href: "/admin/members" },
-    { icon: Dumbbell, label: "Coaches", href: "/admin/coaches" },
-    { icon: BarChart2, label: "Report", href: "/admin/report" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/coach" },
+    { icon: User, label: "Profile", href: "/coach/profile" },
+    { icon: Users, label: "My Members", href: "/coach/members" },
+    { icon: FileText, label: "Plan", href: "/coach/plan" },
+    { icon: BarChart2, label: "Feedback", href: "/coach/feedback" },
   ]
 
   const isActive = (path: string) => {
-    if (path === "/admin") {
-      return pathname === "/admin"
+    if (path === "/coach") {
+      return pathname === "/coach"
     }
     return pathname.startsWith(path)
   }
@@ -59,7 +55,7 @@ export default function Sidebar() {
             className="rounded-full object-cover w-full h-full"
           />
         </div>
-        <h3 className="font-medium">Administrator</h3>
+        <h3 className="font-medium">Coach</h3>
         <p className="text-xs text-gray-300">abcdefgh@gmail.com</p>
       </div>
 
