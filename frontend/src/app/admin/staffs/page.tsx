@@ -8,30 +8,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label"
 import { Search } from "lucide-react"
 
-// Định nghĩa kiểu dữ liệu cho Member
-interface Member {
+// Định nghĩa kiểu dữ liệu cho Staff
+interface Staff {
   id: number
   name: string
   code: string
   startDate: string
   duration: string
-  trainingType: string
+  salary: number
   sessionsCompleted: number
   sessionsRegistered: number
 }
 
-export default function MembersPage() {
+export default function StaffsPage() {
   const [isEditOpen, setIsEditOpen] = useState(false)
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [members, setMembers] = useState<Member[]>([
+  const [staffs, setStaffs] = useState<Staff[]>([
     {
       id: 1,
       name: "James Medalla",
       code: "SFM001",
       startDate: "2023-01-15",
       duration: "12 months",
-      trainingType: "Gym",
+      salary: 1000,
       sessionsCompleted: 20,
       sessionsRegistered: 24,
     },
@@ -41,7 +41,7 @@ export default function MembersPage() {
       code: "SFM002",
       startDate: "2023-02-20",
       duration: "6 months",
-      trainingType: "Yoga",
+      salary: 1000,
       sessionsCompleted: 12,
       sessionsRegistered: 18,
     },
@@ -51,7 +51,7 @@ export default function MembersPage() {
       code: "SFM003",
       startDate: "2023-03-10",
       duration: "3 months",
-      trainingType: "Weight Loss",
+      salary: 1000,
       sessionsCompleted: 10,
       sessionsRegistered: 12,
     },
@@ -61,7 +61,7 @@ export default function MembersPage() {
       code: "SFM004",
       startDate: "2023-04-05",
       duration: "1 month",
-      trainingType: "Gym",
+      salary: 1000,
       sessionsCompleted: 4,
       sessionsRegistered: 8,
     },
@@ -71,107 +71,78 @@ export default function MembersPage() {
       code: "SFM005",
       startDate: "2022-12-22",
       duration: "12 months",
-      trainingType: "Yoga",
+      salary: 1000,
       sessionsCompleted: 28,
       sessionsRegistered: 30,
     },
   ])
 
-  const handleEditClick = (member: Member) => {
-    setSelectedMember(member)
+  const handleEditClick = (staff: Staff) => {
+    setSelectedStaff(staff)
     setIsEditOpen(true)
   }
 
-  const handleInputChange = (field: keyof Member, value: number | string) => {
-    if (selectedMember) {
-      setSelectedMember({ ...selectedMember, [field]: value })
+  const handleInputChange = (field: keyof Staff, value: number | string) => {
+    if (selectedStaff) {
+      setSelectedStaff({ ...selectedStaff, [field]: value })
     }
   }
 
   const handleSave = () => {
-    if (selectedMember) {
-      // Cập nhật dữ liệu của thành viên trong mảng members
-      const updatedMembers = members.map((member) => (member.id === selectedMember.id ? selectedMember : member))
-      setMembers(updatedMembers)
+    if (selectedStaff) {
+      const updatedStaffs = staffs.map((staff) =>
+        staff.id === selectedStaff.id ? selectedStaff : staff,
+      )
+      setStaffs(updatedStaffs)
       setIsEditOpen(false)
     }
   }
 
-  // Lọc danh sách thành viên theo từ khóa tìm kiếm
-  const filteredMembers = members.filter(
-    (member) =>
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.trainingType.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredStaffs = staffs.filter(
+    (staff) =>
+      staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      staff.code.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Members</h1>
+        <h1 className="text-2xl font-bold">Staffs</h1>
       </div>
 
       {/* Edit Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Member</DialogTitle>
+            <DialogTitle>Edit Staff</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6">
             <div>
-              <Label htmlFor="member-name" className="mb-1">
-                Member Name
+              <Label htmlFor="staff-name" className="mb-1">
+                Staff Name
               </Label>
-              <Input id="member-name" value={selectedMember?.name || ""} disabled />
+              <Input id="staff-name" value={selectedStaff?.name || ""} disabled />
             </div>
             <div>
-              <Label htmlFor="member-code" className="mb-1">
-                Member Code
+              <Label htmlFor="staff-code" className="mb-1">
+                Staff Code
               </Label>
-              <Input id="member-code" value={selectedMember?.code || ""} disabled />
+              <Input id="staff-code" value={selectedStaff?.code || ""} disabled />
             </div>
             <div>
               <Label htmlFor="start-date" className="mb-1">
                 Start Date
               </Label>
-              <Input id="start-date" type="date" value={selectedMember?.startDate || ""} disabled />
-            </div>
-            <div>
-              <Label htmlFor="duration" className="mb-1">
-                Length of Membership
-              </Label>
-              <Input id="duration" value={selectedMember?.duration || ""} disabled />
+              <Input id="start-date" type="date" value={selectedStaff?.startDate || ""} disabled />
             </div>
             <div>
               <Label htmlFor="training-type" className="mb-1">
-                Training Type
+                Salary
               </Label>
-              <Input id="training-type" value={selectedMember?.trainingType || ""} disabled />
-            </div>
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <Label htmlFor="sessions-completed" className="mb-1">
-                  Sessions Completed
-                </Label>
-                <Input
-                  id="sessions-completed"
-                  type="number"
-                  value={selectedMember?.sessionsCompleted || 0}
-                  onChange={(e) => handleInputChange("sessionsCompleted", Number.parseInt(e.target.value) || 0)}
-                />
-              </div>
-              <div className="flex-1">
-                <Label htmlFor="sessions-registered" className="mb-1">
-                  Sessions Registered
-                </Label>
-                <Input
-                  id="sessions-registered"
-                  type="number"
-                  value={selectedMember?.sessionsRegistered || 0}
-                  disabled
-                />
-              </div>
+              <Input id="training-type" value={selectedStaff?.salary || ""}
+                onChange={(e) => handleInputChange("sessionsCompleted", Number.parseInt(e.target.value) || 0)}
+              />
             </div>
           </div>
 
@@ -189,11 +160,11 @@ export default function MembersPage() {
       <Card>
         <CardHeader>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <CardTitle>All Members</CardTitle>
+            <CardTitle>All Staffs</CardTitle>
             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
               <div className="relative w-full md:w-64">
                 <Input
-                  placeholder="Search members..."
+                  placeholder="Search staffs..."
                   className="pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -209,33 +180,29 @@ export default function MembersPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium">#</th>
-                  <th className="text-left py-3 px-4 font-medium">Member Name</th>
-                  <th className="text-left py-3 px-4 font-medium">Member Code</th>
+                  <th className="text-left py-3 px-4 font-medium">Staff Name</th>
+                  <th className="text-left py-3 px-4 font-medium">Staff Code</th>
                   <th className="text-left py-3 px-4 font-medium">Start Date</th>
-                  <th className="text-left py-3 px-4 font-medium">Length of Membership</th>
-                  <th className="text-left py-3 px-4 font-medium">Training Type</th>
-                  <th className="text-left py-3 px-4 font-medium">Sessions</th>
+                  <th className="text-left py-3 px-4 font-medium">Length of Service</th>
+                  <th className="text-left py-3 px-4 font-medium">Salary</th>
                   <th className="text-right py-3 px-4 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredMembers.map((member, index) => (
-                  <tr key={member.id} className="border-b">
+                {filteredStaffs.map((staff, index) => (
+                  <tr key={staff.id} className="border-b">
                     <td className="py-3 px-4">{index + 1}</td>
-                    <td className="py-3 px-4">{member.name}</td>
-                    <td className="py-3 px-4">{member.code}</td>
-                    <td className="py-3 px-4">{member.startDate}</td>
-                    <td className="py-3 px-4">{member.duration}</td>
-                    <td className="py-3 px-4">{member.trainingType}</td>
-                    <td className="py-3 px-4">
-                      {member.sessionsCompleted} / {member.sessionsRegistered}
-                    </td>
+                    <td className="py-3 px-4">{staff.name}</td>
+                    <td className="py-3 px-4">{staff.code}</td>
+                    <td className="py-3 px-4">{staff.startDate}</td>
+                    <td className="py-3 px-4">{staff.duration}</td>
+                    <td className="py-3 px-4">{staff.salary} $</td>
                     <td className="py-3 px-4 text-right">
                       <Button
                         variant="outline"
                         size="sm"
                         className="cursor-pointer"
-                        onClick={() => handleEditClick(member)}
+                        onClick={() => handleEditClick(staff)}
                       >
                         Edit
                       </Button>

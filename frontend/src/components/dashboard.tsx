@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Bell, MoreVertical, Search, ArrowUpDown } from "lucide-react"
 import Image from "next/image"
-import Sidebar from "@/components/sidebar"
+import Sidebar from "@/components/sidebar/sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
