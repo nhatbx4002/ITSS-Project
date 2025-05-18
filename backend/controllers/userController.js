@@ -46,6 +46,53 @@ const userController = {
             });
         }
     },
+
+    getAllMember: async(req, res) => {
+        try {
+            const members = await userService.getAllMember('member');
+
+        res.json({
+            success: true,
+            data: members
+        });
+
+        } catch(error) {
+             console.error("Error fetching users:", error);
+        res.status(500).json({
+            success: false,
+            message: "Lỗi server khi lấy danh sách member"
+        });
+        }
+    },
+
+    updateMember: async(req, res) => {
+        try {
+            const id = req.params.id;
+
+            const updateData = req.body;
+            const existingUser = await userService.getUserById(id);
+            if (!existingUser || existingUser.role !== 'member') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Member not found or not a valid member'
+            });
+        }
+        const updatedMember = await userService.updateUser(id, updateData);
+
+        res.json({
+            success: true,
+            message: 'Member updated successfully',
+            data: updatedMember
+        });
+        } catch (err) {
+            console.error('Error updating member:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi server khi cập nhật member',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+        }
+    }
     
 
     getUserById: async (req, res) => {

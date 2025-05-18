@@ -20,6 +20,10 @@ const userService = {
         return await User.find();
     },
 
+    getAllMember: async (role) => {
+        return await User.find({ role });
+    },
+
     getUserById: async (id) => {
         return await User.findById(id);
     },
