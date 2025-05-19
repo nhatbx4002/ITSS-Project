@@ -1,0 +1,123 @@
+/* MembershipDetail.css */
+.form-container {
+  width: 400px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  position: relative;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+}
+
+.form-title {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: underline;
+}
+
+.form-section {
+  margin-bottom: 15px;
+}
+
+.info-label {
+  font-weight: normal;
+  margin-bottom: 8px;
+}
+
+.form-row {
+  display: flex;
+  margin-bottom: 10px;
+  height: 40px;
+}
+
+.field-label {
+  background-color: #d9e1e7;
+  padding: 10px;
+  border-radius: 6px 0 0 6px;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  color: #333;
+}
+
+.field-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d9e1e7;
+  border-radius: 0 6px 6px 0;
+  font-size: 16px;
+}
+
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2214%22%20height%3D%2214%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M7%2012L0%204h14z%22%20fill%3D%22%23000%22%2F%3E%3C%2Fsvg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 30px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.delete-btn {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.delete-btn::after {
+  content: "🗑";
+  margin-left: 8px;
+  font-size: 16px;
+}
+
+.update-btn {
+  background-color: #ffcc29;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.update-btn::after {
+  content: "✏️";
+  margin-left: 8px;
+}

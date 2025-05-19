@@ -2,25 +2,25 @@
 const StaffService = require('../services/staffService')
 
 class StaffControllers {
-    async getAllMembers(req,res){
-        try{
-            const listMembers = await StaffService.getAllMembers();
-            res.status(200).json({
-                success : 'true',
-                message : "Get All members successfully",
-                listMembers : listMembers
-            })
+    async getAllMembers(req, res) {
+  try {
+    const searchTerm = req.query.search || ''; // lấy search từ query param, nếu không có thì là ''
+    const listMembers = await StaffService.getAllMembers(searchTerm);
 
-        }catch(error){
-            console.log(error);
-            res.status(500).json({
-                success : false,
-                message : "Fail to get All members",
-                error : error
-            })
-            
-        }
-    }
+    res.status(200).json({
+      success: true,
+      message: "Get all members successfully",
+      listMembers: listMembers
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Fail to get all members",
+      error: error.message || error
+    });
+  }
+}
     async getMembersById(req,res){
         try{
             const member = await staffService.getMemberById(req.params.id);
@@ -43,7 +43,7 @@ class StaffControllers {
 
     async deleteMemberById(req,res){
         try{
-            const deleteMemberById = await staffService.deleteMember(req.params.id);
+            const deleteMemberById = await StaffService.deleteMember(req.params.id);
             res.status(200).json({
                 success : "true",
                 message : "delete members successfully",
@@ -121,7 +121,7 @@ class StaffControllers {
 
     async updateMemberSubscription (req,res) {
         try{
-            const updatedSuscription = await StaffService.updateMemberSubscription(req.params.id,req.body);
+            const updatedSuscription = await StaffService.upsertMemberSubscription(req.params.user_id,req.body);
             console.log(req.params.id);
             console.log(req.body);
             res.status(200).json({
