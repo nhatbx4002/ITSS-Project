@@ -116,9 +116,9 @@ export default function MemberList() {
               </Label>
               <Input
                 id="member-birthday"
-                value={selectedMember?.birthdate || ""}
+                value={selectedMember?.birthdate ? new Date(selectedMember.birthdate).toISOString().split('T')[0] : ""}
                 onChange={(e) =>
-                  setSelectedMember((prev) => prev ? { ...prev, birthdate: e.target.value } : null)
+                  setSelectedMember((prev) => prev ? { ...prev, birthdate: new Date(e.target.value) } : null)
                 }
               />
             </div>
@@ -128,9 +128,13 @@ export default function MemberList() {
               </Label>
               <Input
                 id="member-membership_expiry_date"
-                value={selectedMember?.membership_expiry_date || ""}
+                value={
+                  selectedMember?.membership_expiry_date ? new Date(selectedMember.membership_expiry_date).toISOString().split("T")[0] : ""
+                  }
                 onChange={(e) =>
-                  setSelectedMember((prev) => prev ? { ...prev, membership_expiry_date: e.target.value } : null)
+                  setSelectedMember((prev) =>
+                  prev ? { ...prev, membership_expiry_date: new Date(e.target.value) } : null
+                  )
                 }
               />
             </div>

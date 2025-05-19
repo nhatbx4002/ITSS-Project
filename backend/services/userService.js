@@ -24,12 +24,14 @@ const userService = {
         return await User.find({ role });
     },
 
+
+
     getUserById: async (id) => {
         return await User.findById(id);
     },
 
     updateUser: async (id, updateData) => {
-        const allowedFields = ['full_name', 'email', 'password_hash', 'phone', 'birthdate'];
+        const allowedFields = ['full_name', 'email', 'phone', 'birthdate', 'membership_expiry_date'];
         const filteredData = {};
     
         // Chỉ lấy các field hợp lệ, tránh ghi đè nhầm null

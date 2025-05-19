@@ -10,7 +10,13 @@ router.get('/', userController.getAllUsers);
 
 router.get('/member', userController.getAllMember);
 
-router.put('/member', userController.updateMember);
+
+
+// router.get('/staff', userController.getAllStaff);
+
+router.put('/member/:id', userController.updateMember);
+
+// router.put('/staff', userController.updateStaff);
 // Lấy user theo ID
 router.get('/:id', userController.getUserById);
 
