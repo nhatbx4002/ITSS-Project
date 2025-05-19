@@ -1,10 +1,13 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import Calendar from "@/components/calendar"
 import { Search, ArrowUpDown, MoreVertical } from "lucide-react"
 import Image from "next/image"
 import MonthlyCalendar from "@/components/calendar"
+import { useEffect, useState } from "react"
+import { getAllFeedBack } from "@/lib/api/feedback"
 
 
 // Define simple feedback type
@@ -34,33 +37,31 @@ export default function DashboardPage() {
     { id: "SFS002", name: "Hieu"},
     { id: "SFS003", name: "Hieu" },
   ]
+const [feedbacks, setFeedbacks] = useState([]);
+const [error, setError] = useState<string | null>(null)
 
   // Sample feedback data
-  const feedbacks: Feedback[] = [
-    {
-      id: 1,
-      memberName: "James Medalla",
-      message:
-        "The gym equipment is great, but I think we need more treadmills. During peak hours it's hard to get one.",
-      date: "2023-05-10",
-      type: "suggestion",
-    },
-    {
-      id: 2,
-      memberName: "Kent Chari Mabatas",
-      message:
-        "Coach Peter is amazing! His training sessions are challenging but very effective. I've seen great results in just a month.",
-      date: "2023-05-08",
-      type: "positive",
-    },
-    {
-      id: 3,
-      memberName: "John Elmer Rodrigo",
-      message: "The locker rooms could be cleaner. Sometimes there are no clean towels available.",
-      date: "2023-05-05",
-      type: "negative",
-    },
-  ]
+  useEffect(() => {
+      fetchFeedback();
+  }, []);
+  
+  const fetchFeedback = () => {
+      getAllFeedBack()
+        .then((res) => {
+          if (res.success) {
+            setFeedbacks(res.data);
+            setError(null);
+          } else {
+            setError("API trả về lỗi");
+          }
+        })
+        .catch((err) => setError(err.message));
+    };
+function getRandomFeedbacks(feedbacks: any[], count: number) {
+  const shuffled = [...feedbacks].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
+const randomFeedbacks = getRandomFeedbacks(feedbacks, 3);
 
   return (
     <main className="p-6">
@@ -130,29 +131,24 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Feedback */}
-        <Card className="col-span-12 md:col-span-4">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Feedback</CardTitle>
-            <Button variant="ghost" size="icon" className="cursor-pointer">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {feedbacks.map((feedback) => (
-                <div key={feedback.id} className="flex flex-col">
-                  <span className="font-semibold text-[#1a1a6c]">{feedback.memberName}</span>
-                  <span className="text-sm text-gray-500 capitalize">{feedback.type}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+{/* Feedback */}
+{randomFeedbacks.map((feedback) => (
+  <div key={feedback._id} className="border rounded-2xl shadow-lg mb-4">
+    <p className="font-semibold">{feedback.user_id?.full_name} đánh giá {feedback.rating}/5 ⭐</p>
+    <p className="italic text-gray-700">“{feedback.comment}”</p>
 
-      </div>
+    <div className="bg-gray-100 p-3 mt-2 rounded">
+      <p className="text-sm text-gray-600">Admin phản hồi:</p>
+      <p className="text-black">{feedback.response}</p>
+      <p className="text-xs text-right text-gray-500">
+        {new Date(feedback.response_at).toLocaleString("vi-VN")}
+      </p>
+    </div>
+  </div>
+))}
 
-      <div className="flex flex-wrap gap-4">
+</div>
+<div className="flex flex-wrap gap-4">
   {/* Active Members */}
   <div className="w-full md:w-1/3 bg-[#7a7aa3] rounded-lg p-6 mb-6">
     <div className="mb-4">

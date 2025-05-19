@@ -2,27 +2,22 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-// Tạo user
-router.post('/', userController.createUser);
-
-// Lấy tất cả user
-router.get('/', userController.getAllUsers);
+// Ưu tiên route cụ thể trước
+router.get('/staff', userController.getAllStaff);
+router.put('/staff/:id', userController.updateStaff);
 
 router.get('/member', userController.getAllMember);
-
-
-
-// router.get('/staff', userController.getAllStaff);
-
 router.put('/member/:id', userController.updateMember);
 
-// router.put('/staff', userController.updateStaff);
-// Lấy user theo ID
+// Tạo và lấy tất cả user
+router.post('/', userController.createUser);
+router.get('/', userController.getAllUsers);
+
+// Route động - để cuối cùng
 router.get('/:id', userController.getUserById);
-
 router.put('/:id', userController.updateUser);
-
 router.delete('/:id', userController.deleteUser);
+
 
 
 

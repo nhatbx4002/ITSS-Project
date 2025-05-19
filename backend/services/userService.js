@@ -53,6 +53,28 @@ const userService = {
         return updatedUser;
     },
 
+    updateStaff: async (id, updateData) => {
+        const allowedFields = ['full_name', 'email', 'phone', 'birthdate'];
+        const filteredData = {};
+    
+        // Chỉ lấy các field hợp lệ, tránh ghi đè nhầm null
+        for (const field of allowedFields) {
+            if (updateData[field] !== undefined) {
+                filteredData[field] = updateData[field];
+            }
+        }
+    
+        const updatedStaff = await User.findByIdAndUpdate(
+            id,
+            filteredData,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+    
+        return updatedStaff;
+    },
     deleteUser: async (id) => {
         const deletedUser = await User.findByIdAndDelete(id);
         return deletedUser;

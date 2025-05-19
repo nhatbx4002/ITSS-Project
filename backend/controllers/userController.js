@@ -93,6 +93,54 @@ const userController = {
             });
         }
     },
+
+    getAllStaff: async(req, res) => {
+        try {
+            const staffs = await userService.getAllMember('staff');
+
+        res.json({
+            success: true,
+            data: staffs
+        });
+
+        } catch(error) {
+            console.error("Error fetching staff:", error);
+            res.status(500).json({
+                success: false,
+                message: "Lỗi server khi lấy danh sách staff"
+            });
+        }
+    },
+
+    updateStaff: async(req, res) => {
+        try {
+            const id = req.params.id;
+
+            const updateData = req.body;
+            const existingUser = await userService.getUserById(id);
+            if (!existingUser || existingUser.role !== 'staff') {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Staff not found or not a valid Staff'
+                });
+            }
+            const updatedStaff = await userService.updateStaff(id, updateData);
+
+            res.json({
+                success: true,
+                message: 'Staff updated successfully',
+                data: updatedStaff
+            });
+        } catch (error) {
+            console.error('Error updating Staff:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Lỗi server khi cập nhật Staff',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
+    },
+
     getUserById: async (req, res) => {
         try {
             const id = req.params.id;
