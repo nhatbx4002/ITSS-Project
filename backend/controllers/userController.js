@@ -92,7 +92,7 @@ const userController = {
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
         }
-    }
+    },
     
 
     getUserById: async (req, res) => {
