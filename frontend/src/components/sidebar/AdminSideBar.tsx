@@ -35,7 +35,6 @@ export default function Sidebar() {
     { icon: Users, label: "Members", href: "/admin/members" },
     { icon: Users, label: "Staffs", href: "/admin/staffs" },
     { icon: Dumbbell, label: "Coaches", href: "/admin/coaches" },
-    { icon: BarChart2, label: "Report", href: "/admin/report" },
   ]
 
   const isActive = (path: string) => {
