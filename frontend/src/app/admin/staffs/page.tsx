@@ -74,7 +74,7 @@ export default function StaffList() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Members</h1>
+        <h1 className="text-2xl font-bold">Staffs</h1>
       </div>
 {/* form  */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

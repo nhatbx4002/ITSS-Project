@@ -68,7 +68,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-12 gap-6 mb-8">
         {/* Welcome Banner */}
         <Card className="col-span-12 md:col-span-8">
-          <CardContent className="p-6">
+          <CardContent className="px-6 py-1">
             <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-medium mb-2">

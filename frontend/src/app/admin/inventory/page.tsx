@@ -94,8 +94,8 @@ export default function InventoryPage() {
   return (
   <div className="p-6">
     <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl font-bold">Quản lý thiết bị</h1>
-      <Button onClick={() => setIsAddDialogOpen(true)}>+ Thêm thiết bị</Button>
+      <h1 className="text-2xl font-bold">Inventory</h1>
+      <Button onClick={() => setIsAddDialogOpen(true)} className="cursor-pointer">+ Add inventory</Button>
     </div>
 
     {error && <p className="text-red-500">{error}</p>}
@@ -124,7 +124,7 @@ export default function InventoryPage() {
               setIsEditDialogOpen(true);
             }}
           >
-            Chỉnh sửa
+            Edit
           </Button>
         </div>
       ))}
@@ -133,13 +133,13 @@ export default function InventoryPage() {
     {/* Dialog Thêm thiết bị */}
     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
       <DialogContent>
-        <DialogTitle>Thêm thiết bị</DialogTitle>
+        <DialogTitle>Add inventory</DialogTitle>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <Input name="name" placeholder="Tên thiết bị" value={form.name} onChange={handleChange} />
           <Input name="purchase_date" placeholder="Ngày mua" value={form.purchase_date} onChange={handleChange} />
           <Input name="warranty_until" placeholder="Bảo hành đến" value={form.warranty_until} onChange={handleChange} />
           <Input name="status" placeholder="Trạng thái" value={form.status} onChange={handleChange} />
-          <Button type="submit">Thêm</Button>
+          <Button type="submit">Add</Button>
         </form>
       </DialogContent>
     </Dialog>
@@ -147,13 +147,13 @@ export default function InventoryPage() {
     {/* Dialog Chỉnh sửa thiết bị */}
     <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
       <DialogContent>
-        <DialogTitle>Chỉnh sửa thiết bị</DialogTitle>
+        <DialogTitle>Edit inventory information</DialogTitle>
         <form onSubmit={(e) => { e.preventDefault(); handleUpdate(); }} className="space-y-4 mt-4">
           <Input name="name" placeholder="Tên thiết bị" value={form.name} onChange={handleChange} />
           <Input name="purchase_date" placeholder="Ngày mua" value={form.purchase_date} onChange={handleChange} />
           <Input name="warranty_until" placeholder="Bảo hành đến" value={form.warranty_until} onChange={handleChange} />
           <Input name="status" placeholder="Trạng thái" value={form.status} onChange={handleChange} />
-          <Button type="submit">Cập nhật</Button>
+          <Button type="submit">Save</Button>
         </form>
       </DialogContent>
     </Dialog>
