@@ -1,13 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, use, useState } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PencilIcon } from "lucide-react"
+import {getInfo} from "@/services/users-services"
 
 export default function AdminProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
+  const [userInfo , setUserInfo] = useState({
+    full_name: "", 
+    email: "",
+    phone: "",
+    birthdate: "",
+    role: "",
+  });
+  
+  async function fetchUserInfo (){
+    try {
+      
+      const response = await getInfo();
+      
+      if(response) setUserInfo(response);
+
+      console.log(response.full_name)
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect( () => {
+    fetchUserInfo()
+}, []);
+
+
 
   return (
     <div className="p-6">
@@ -28,19 +55,19 @@ export default function AdminProfilePage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2">
             <p className="text-gray-600">Fullname</p>
-            <p className="font-medium">Nguyen Van A</p>
+            <p className="font-medium">{userInfo.full_name}</p>
           </div>
           <div className="grid grid-cols-2">
             <p className="text-gray-600">Date of birth:</p>
-            <p className="font-medium">01/01/2025</p>
+            <p className="font-medium">{userInfo.birthdate}</p>
           </div>
           <div className="grid grid-cols-2">
             <p className="text-gray-600">Contact no.</p>
-            <p className="font-medium">09123456789</p>
+            <p className="font-medium">{userInfo.phone}</p>
           </div>
           <div className="grid grid-cols-2">
             <p className="text-gray-600">Email Address:</p>
-            <p className="font-medium">abcdefgh@gmail.com</p>
+            <p className="font-medium">{userInfo.email}</p>
           </div>
           <div className="grid grid-cols-2">
             <p className="text-gray-600">Start Date:</p>
@@ -66,21 +93,21 @@ export default function AdminProfilePage() {
               <label htmlFor="username" className="block text-sm font-medium mb-1">
                 Fullname
               </label>
-              <Input id="username" defaultValue="Nguyen Van A" className="bg-gray-100" />
+              <Input id="username" defaultValue={userInfo.full_name} className="bg-gray-100" />
             </div>
 
             <div>
               <label htmlFor="contact" className="block text-sm font-medium mb-1">
                 Contact No.
               </label>
-              <Input id="contact" defaultValue="09123456789" className="bg-gray-100" />
+              <Input id="contact" defaultValue={userInfo.phone} className="bg-gray-100" />
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-1">
                 Email Address
               </label>
-              <Input id="email" type="email" defaultValue="abcdefgh@gmail.com" className="bg-gray-100" />
+              <Input id="email" type="email" defaultValue={userInfo.email} className="bg-gray-100" />
             </div>
 
           </div>

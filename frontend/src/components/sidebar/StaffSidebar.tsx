@@ -18,6 +18,10 @@ import {
   LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useState } from "react"
+import { useSession } from "next-auth/react" 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { signOut } from "next-auth/react";
 
 type NavItem = {
   icon: React.ElementType
@@ -26,7 +30,22 @@ type NavItem = {
 }
 
 export default function Sidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const { data: session, status } = useSession();
+
+  const getInitials = (name?: string | null) => {
+    if (!name) return "Staff"; // Mặc định nếu không có tên
+    const parts = name.split(' ');
+    if (parts.length > 1) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
+
+  const userName = session?.user?.name || session?.user?.email || "Admin";
+  const userEmail = session?.user?.email || "N/A"; 
+  const userImage = session?.user?.image;
+
 
   const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/staff" },
@@ -49,17 +68,26 @@ export default function Sidebar() {
     <div className="w-[190px] bg-[#1a1a6c] text-white flex flex-col h-screen">
       {/* Admin Profile */}
       <div className="p-4 flex flex-col items-center text-center border-b border-[#2a2a7c]">
-        <div className="w-16 h-16 bg-white rounded-full mb-2 flex items-center justify-center">
-          <Image
-            src="/coach-long.jpg"
-            alt="Admin"
-            width={64}
-            height={64}
-            className="rounded-full object-cover w-full h-full"
-          />
-        </div>
-        <h3 className="font-medium">Staff</h3>
-        <p className="text-xs text-gray-300">abcdefgh@gmail.com</p>
+        <Avatar className="w-16 h-16 mb-2"> {/* Sử dụng Avatar */}
+          {userImage && (
+            <AvatarImage src={userImage} alt={userName} className="object-cover" />
+          )}
+          <AvatarFallback className="bg-white text-[#2a2a7c] font-bold">
+            {getInitials(userName)} {/* Hiển thị chữ cái đầu tên */}
+          </AvatarFallback>
+        </Avatar>
+
+        {status === 'authenticated' ? (
+          <>
+            <h3 className="font-medium">{userName}</h3>
+            <p className="text-xs text-gray-300">{userEmail}</p>
+          </>
+        ) : (
+          <>
+            <h3 className="font-medium">Loading...</h3>
+            <p className="text-xs text-gray-300">...</p>
+          </>
+        )}
       </div>
 
       {/* Navigation */}
@@ -84,7 +112,7 @@ export default function Sidebar() {
 
       {/* Logout */}
       <div className="p-4 border-t border-[#2a2a7c]">
-        <button className="flex items-center gap-3 w-full px-4 py-2 hover:bg-[#2a2a7c] transition-colors rounded-md cursor-pointer">
+        <button className="flex items-center gap-3 w-full px-4 py-2 hover:bg-[#2a2a7c] transition-colors rounded-md cursor-pointer" onClick={() => signOut({ callbackUrl: '/' })}>
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
         </button>

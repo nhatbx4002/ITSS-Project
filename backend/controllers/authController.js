@@ -1,6 +1,7 @@
 const authServices = require('../services/authServices');
 const User = require('../models/usersModel');
 
+
 // Đăng ký tài khoản mới
 exports.register = async (req, res) => {
   try {
@@ -20,11 +21,13 @@ exports.register = async (req, res) => {
 // Đăng nhập
 exports.login = async (req, res) => {
   try {
-    const token = await authServices.Login(req.body);
+    const {user, token} = await authServices.Login(req.body);
 
     res.json({
+      success: true,
       message: 'Đăng nhập thành công',
-      token: token
+      user,
+      authToken: token
     });
   } catch (error) {
     res.status(500).json({
@@ -70,3 +73,36 @@ exports.changePassword = async (req, res) => {
     });
   }
 }; 
+
+exports.googleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Thiếu ID token từ Google',
+      });
+    }
+
+    const {user, token} = await authServices.GoogleLogin({ idToken });
+
+
+    res.json({
+      success: true,
+      message: 'Đăng nhập Google thành công',
+      user,
+      authToken: token,
+    });
+
+  } catch (error) {
+    console.error('[Google Login Error]', error);
+    res.status(500).json({
+      success: false,
+      message: 'Xác thực Google thất bại',
+      detail: error.message,
+    });
+  }
+};
+
+
