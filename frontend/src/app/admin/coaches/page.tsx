@@ -1,12 +1,14 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Search } from "lucide-react"
+import { Search, Edit, Trash2 } from "lucide-react"
 
 // Định nghĩa kiểu dữ liệu cho Coach
 interface Coach {
@@ -22,6 +24,8 @@ interface Coach {
 
 export default function CoachesPage() {
   const [isEditOpen, setIsEditOpen] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [coaches, setCoaches] = useState<Coach[]>([
@@ -77,22 +81,93 @@ export default function CoachesPage() {
     },
   ])
 
-  const handleEditClick = (coach: Coach) => {
-    setSelectedCoach(coach)
-    setIsEditOpen(true)
+  const [form, setForm] = useState({
+    name: "",
+    code: "",
+    startDate: "",
+    duration: "",
+    trainingType: "",
+    sessionsCompleted: 0,
+    sessionsRegistered: 0,
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setForm({ ...form, [name]: name.includes("sessions") ? Number(value) : value })
   }
 
-  const handleInputChange = (field: keyof Coach, value: number | string) => {
-    if (selectedCoach) {
-      setSelectedCoach({ ...selectedCoach, [field]: value })
-    }
+  const handleEditClick = (coach: Coach) => {
+    setSelectedCoach(coach)
+    setForm({
+      name: coach.name,
+      code: coach.code,
+      startDate: coach.startDate,
+      duration: coach.duration,
+      trainingType: coach.trainingType,
+      sessionsCompleted: coach.sessionsCompleted,
+      sessionsRegistered: coach.sessionsRegistered,
+    })
+    setIsEditOpen(true)
   }
 
   const handleSave = () => {
     if (selectedCoach) {
-      const updatedCoaches = coaches.map((coach) => (coach.id === selectedCoach.id ? selectedCoach : coach))
+      const updatedCoach = {
+        ...selectedCoach,
+        name: form.name,
+        code: form.code,
+        startDate: form.startDate,
+        duration: form.duration,
+        trainingType: form.trainingType,
+        sessionsCompleted: form.sessionsCompleted,
+        sessionsRegistered: form.sessionsRegistered,
+      }
+      const updatedCoaches = coaches.map((coach) => (coach.id === selectedCoach.id ? updatedCoach : coach))
       setCoaches(updatedCoaches)
       setIsEditOpen(false)
+      setSelectedCoach(null)
+      setForm({
+        name: "",
+        code: "",
+        startDate: "",
+        duration: "",
+        trainingType: "",
+        sessionsCompleted: 0,
+        sessionsRegistered: 0,
+      })
+    }
+  }
+
+  const handleAdd = () => {
+    const newCoach: Coach = {
+      id: Math.max(...coaches.map((c) => c.id)) + 1,
+      name: form.name,
+      code: form.code,
+      startDate: form.startDate,
+      duration: form.duration,
+      trainingType: form.trainingType,
+      sessionsCompleted: form.sessionsCompleted,
+      sessionsRegistered: form.sessionsRegistered,
+    }
+    setCoaches([...coaches, newCoach])
+    setIsAddOpen(false)
+    setForm({
+      name: "",
+      code: "",
+      startDate: "",
+      duration: "",
+      trainingType: "",
+      sessionsCompleted: 0,
+      sessionsRegistered: 0,
+    })
+  }
+
+  const handleDelete = () => {
+    if (selectedCoach) {
+      const updatedCoaches = coaches.filter((coach) => coach.id !== selectedCoach.id)
+      setCoaches(updatedCoaches)
+      setIsDeleteOpen(false)
+      setSelectedCoach(null)
     }
   }
 
@@ -100,14 +175,78 @@ export default function CoachesPage() {
     (coach) =>
       coach.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coach.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      coach.trainingType.toLowerCase().includes(searchTerm.toLowerCase())
+      coach.trainingType.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Coaches</h1>
+        <Button onClick={() => setIsAddOpen(true)} className="cursor-pointer">
+          + Add Coach
+        </Button>
       </div>
+
+      {/* Add Coach Dialog */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Coach</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="add-coach-name">Coach Name</Label>
+              <Input id="add-coach-name" name="name" value={form.name} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="add-coach-code">Coach ID</Label>
+              <Input id="add-coach-code" name="code" value={form.code} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="add-start-date">Start Date</Label>
+              <Input id="add-start-date" name="startDate" type="date" value={form.startDate} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="add-duration">Length of Service</Label>
+              <Input id="add-duration" name="duration" value={form.duration} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="add-training-type">Training Type</Label>
+              <Input id="add-training-type" name="trainingType" value={form.trainingType} onChange={handleChange} />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="add-sessions-completed">Sessions Completed</Label>
+                <Input
+                  id="add-sessions-completed"
+                  name="sessionsCompleted"
+                  type="number"
+                  value={form.sessionsCompleted}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="add-sessions-registered">Sessions Registered</Label>
+                <Input
+                  id="add-sessions-registered"
+                  name="sessionsRegistered"
+                  type="number"
+                  value={form.sessionsRegistered}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setIsAddOpen(false)} variant="outline" className="cursor-pointer">
+              Cancel
+            </Button>
+            <Button onClick={handleAdd} className="cursor-pointer">Add Coach</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
@@ -119,49 +258,73 @@ export default function CoachesPage() {
           <div className="space-y-6">
             <div>
               <Label htmlFor="coach-name">Coach Name</Label>
-              <Input
-                id="coach-name"
-                value={selectedCoach?.name || ""}
-                disabled
-              />
+              <Input id="coach-name" name="name" value={form.name} onChange={handleChange} />
             </div>
             <div>
               <Label htmlFor="coach-code">Coach ID</Label>
-              <Input
-                id="coach-code"
-                value={selectedCoach?.code || ""}
-                disabled
-              />
+              <Input id="coach-code" name="code" value={form.code} onChange={handleChange} />
             </div>
             <div>
               <Label htmlFor="start-date">Start Date</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={selectedCoach?.startDate || ""}
-                disabled
-              />
+              <Input id="start-date" name="startDate" type="date" value={form.startDate} onChange={handleChange} />
             </div>
             <div>
               <Label htmlFor="duration">Length of Service</Label>
-              <Input
-                id="duration"
-                value={selectedCoach?.duration || ""}
-                disabled />
+              <Input id="duration" name="duration" value={form.duration} onChange={handleChange} />
             </div>
             <div>
               <Label htmlFor="training-type">Training Type</Label>
-              <Input
-                id="training-type"
-                value={selectedCoach?.trainingType || ""}
-                onChange={(e) => handleInputChange("trainingType", e.target.value)}
-              />
+              <Input id="training-type" name="trainingType" value={form.trainingType} onChange={handleChange} />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <Label htmlFor="sessions-completed">Sessions Completed</Label>
+                <Input
+                  id="sessions-completed"
+                  name="sessionsCompleted"
+                  type="number"
+                  value={form.sessionsCompleted}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="sessions-registered">Sessions Registered</Label>
+                <Input
+                  id="sessions-registered"
+                  name="sessionsRegistered"
+                  type="number"
+                  value={form.sessionsRegistered}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setIsEditOpen(false)} variant="outline">Cancel</Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={() => setIsEditOpen(false)} variant="outline" className="cursor-pointer">
+              Cancel
+            </Button>
+            <Button onClick={handleSave} className="cursor-pointer">Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Coach</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Are you sure you want to delete "{selectedCoach?.name}"? This action cannot be undone.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteOpen(false)} className="cursor-pointer">
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} className="cursor-pointer">
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -206,11 +369,28 @@ export default function CoachesPage() {
                     <td className="py-3 px-4">{coach.startDate}</td>
                     <td className="py-3 px-4">{coach.duration}</td>
                     <td className="py-3 px-4">{coach.trainingType}</td>
-
                     <td className="py-3 px-4 text-right">
-                      <Button variant="outline" size="sm" onClick={() => handleEditClick(coach)}>
-                        Edit
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="cursor-pointer"
+                          onClick={() => handleEditClick(coach)}
+                        >
+                          <Edit className="h-4 w-4 mr-1" /> Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                          onClick={() => {
+                            setSelectedCoach(coach)
+                            setIsDeleteOpen(true)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" /> Delete
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -102,37 +102,10 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Coaches */}
-        <Card className="col-span-12 md:col-span-4">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Coaches</CardTitle>
-            <Button variant="ghost" size="icon" className="cursor-pointer">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {coaches.map((coach) => (
-                <div key={coach.id} className="flex items-center gap-3">
-                  <div className="bg-[#1a1a6c] rounded-full w-8 h-8 flex-shrink-0">
-                    <Image
-                      src="/coach-long.jpg"
-                      alt="Profile"
-                      width={64}
-                      height={64}
-                      className="rounded-full object-cover w-full h-full"
-                    />
-                  </div>
-                  <span>{coach.name}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        
 
         {/* Feedback */}
-        <Card className="col-span-12 md:col-span-4">
+        <Card className="col-span-12 md:col-span-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Feedback</CardTitle>
           </CardHeader>
@@ -158,7 +131,7 @@ export default function DashboardPage() {
       </div>
       <div className="flex flex-wrap gap-4">
         {/* Active Members */}
-        <div className="w-full md:w-1/3 bg-[#7a7aa3] rounded-lg p-6 mb-6">
+        <div className="w-full md:w-1/3 bg-[#1a1a6c] rounded-lg p-6 mb-6">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-white mb-4">Active Members</h2>
             <div className="flex justify-between mb-4">
@@ -190,7 +163,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Active Staffs */}
-        <div className="w-full md:w-3/10 bg-[#7a7aa3] rounded-lg p-6 mb-6">
+        <div className="w-full md:w-3/10 bg-[#1a1a6c] rounded-lg p-6 mb-6">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-white mb-4">Active Staffs</h2>
             <div className="flex justify-between mb-4">
@@ -222,7 +195,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Active Coaches */}
-        <div className="w-full md:w-1/3 bg-[#7a7aa3] rounded-lg p-6 mb-6">
+        <div className="w-full md:w-1/3 bg-[#1a1a6c] rounded-lg p-6 mb-6">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-white mb-4">Active Coaches</h2>
             <div className="flex justify-between mb-4">
