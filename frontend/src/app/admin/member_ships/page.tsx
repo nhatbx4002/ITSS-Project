@@ -205,13 +205,16 @@ export default function MembershipList() {
 
               <div className="grid gap-2">
                 <Label htmlFor="duration">Duration</Label>
-                <Input
-                  id="duration"
-                  name="duration"
-                  type="number"
-                  value={form.duration}
-                  onChange={handleChange}
-                />
+                <Select value={form.duration} onValueChange={(value) => setForm({ ...form, duration: value })}>
+                  <SelectTrigger id="duration">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 days</SelectItem>
+                    <SelectItem value="90">90 days</SelectItem>
+                    <SelectItem value="180">180 days</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">
@@ -272,13 +275,16 @@ export default function MembershipList() {
 
               <div className="grid gap-2">
                 <Label htmlFor="edit-duration">Duration</Label>
-                <Input
-                  id="edit-duration"
-                  name="duration"
-                  type="number"
-                  value={form.duration}
-                  onChange={handleChange}
-                />
+                <Select value={form.duration} onValueChange={(value) => setForm({ ...form, duration: value })}>
+                  <SelectTrigger id="edit-duration">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 days</SelectItem>
+                    <SelectItem value="90">90 days</SelectItem>
+                    <SelectItem value="180">180 days</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid gap-2">
