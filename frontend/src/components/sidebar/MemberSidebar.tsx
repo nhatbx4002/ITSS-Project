@@ -33,7 +33,10 @@ export default function Sidebar() {
     { icon: LayoutDashboard, label: "Dashboard", href: "/member" },
     { icon: User, label: "Profile", href: "/member/profile" },
     { icon: ClipboardList, label: "Registration", href: "/member/registration" },
-    { icon: FileText, label: "Plan", href: "/member/plan" },
+  //  { icon: FileText, label: "Plan", href: "/member/plan" },
+    { icon: CreditCard, label: "Subscriptions", href: "/member/subscriptions" },
+    { icon: Dumbbell, label: "Upcoming Workouts", href: "/member/workouts/upcoming" },
+    { icon: BarChart2, label: "Workout History", href: "/member/workouts/history" },
     { icon: NotebookPen, label: "Feedback", href: "/member/feedback" },
   ]
 

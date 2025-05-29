@@ -45,3 +45,44 @@ export async function updateMember(id: string, data: {
     }
     return res.json();
 }
+
+export async function getUpcomingWorkouts(userId: string) { 
+  const res = await fetch(`${API_BASE_URL}/api/members/${userId}/workouts/upcoming`);
+  if (!res.ok) {
+    throw new Error("Lỗi khi lấy lịch tập luyện");
+  }
+  return res.json();
+}
+
+export async function getWorkoutHistory(userId: string) {
+  const res = await fetch(`${API_BASE_URL}/api/members/${userId}/workouts/history`);
+  if (!res.ok) {
+    throw new Error("Lỗi khi lấy lịch sử tập luyện");
+  }
+  return res.json();
+}
+
+export async function getSubscriptions(userId: string) {
+  const res = await fetch(`${API_BASE_URL}/api/members/${userId}/subscriptions`);
+  if (!res.ok) {
+    throw new Error("Lỗi khi lấy danh sách gói tập");
+  }
+  return res.json();
+}
+
+export async function createSubscription(userId: string, data: {
+  package_id: string;
+  start_date: string;
+  end_date: string;
+}) {
+  const res = await fetch(`${API_BASE_URL}/api/members/${userId}/subscriptions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error("Lỗi khi tạo gói tập");
+  }
+  return res.json();
+}
+

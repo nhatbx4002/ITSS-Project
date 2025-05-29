@@ -14,8 +14,8 @@ type Member = {
   full_name: string;
   email: string;
   phone: string;
-  birthdate: Date;
-  membership_expiry_date: Date;
+  birthdate: string;
+  membership_expiry_date: string;
 };
 
 export default function MemberList() {
@@ -174,8 +174,8 @@ export default function MemberList() {
                     <td className="py-3 px-4">{member.full_name}</td>
                     <td className="py-3 px-4">{member.email}</td>
                     <td className="py-3 px-4">{member.phone}</td>
-                    <td className="py-3 px-4">{new Date(member.birthdate).toLocaleDateString()}</td>
-                    <td className="py-3 px-4">{new Date(member.membership_expiry_date).toLocaleDateString()}</td>
+                    <td className="py-3 px-4">{member.birthdate}</td>
+                    <td className="py-3 px-4">{member.membership_expiry_date}</td>
                    
                     <td className="py-3 px-4 text-right">
                       <Button
