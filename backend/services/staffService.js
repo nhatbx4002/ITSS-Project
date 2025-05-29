@@ -2,24 +2,24 @@ const User = require("../models/usersModel");
 const Feedback = require("../models/feedbackModel");
 const Workout = require("../models/workoutModel");
 const Subscription = require('../models/subscriptionModel');
-const Membership = require('../models/membershipModel ');
+const Membership = require('../models/membershipModel');
 
 
 const validMemberships = [
-    { type: 'vip', duration: 30, price: 42 },
-    { type: 'vip', duration: 90, price: 113 },
-    { type: 'vip', duration: 180, price: 208 },
-    { type: 'vip', duration: 365, price: 375 },
+    { type: 'personal_training', duration: 30, price: 42 },
+    { type: 'personal_training', duration: 90, price: 113 },
+    { type: 'personal_training', duration: 180, price: 208 },
+    { type: 'personal_training', duration: 365, price: 375 },
 
     { type: 'standard', duration: 30, price: 25 },
     { type: 'standard', duration: 90, price: 63 },
     { type: 'standard', duration: 180, price: 113 },
     { type: 'standard', duration: 365, price: 208 },
 
-    { type: 'personal_training', duration: 30, price: 84 },
-    { type: 'personal_training', duration: 90, price: 229 },
-    { type: 'personal_training', duration: 180, price: 417 },
-    { type: 'personal_training', duration: 365, price: 750 },
+    { type: 'vip', duration: 30, price: 84 },
+    { type: 'vip', duration: 90, price: 229 },
+    { type: 'vip', duration: 180, price: 417 },
+    { type: 'vip', duration: 365, price: 750 },
 ];
 
 class StaffService {
@@ -81,7 +81,7 @@ class StaffService {
         'membership.duration': 1,
         'membership.name': 1,
         'membership.type' : 1,
-        'membership.price' : 11
+        'membership.price' : 1
       }
     }
   ]);

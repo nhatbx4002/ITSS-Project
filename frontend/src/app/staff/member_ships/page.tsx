@@ -1,138 +1,122 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Plus, Edit, Trash2 } from "lucide-react"
+import { Search, Users } from "lucide-react"
 
 // Define types
 interface MembershipPackage {
   id: number
-  name: string
-  price: number
-  duration: string
   type: string
+  duration: number
+  price: number
+  registeredCount: number
   status: "active" | "inactive"
 }
 
+// Valid membership packages data - 12 gói tập đầy đủ
+const validMemberships = [
+  { type: 'personal_training', duration: 30, price: 42 },
+  { type: 'personal_training', duration: 90, price: 113 },
+  { type: 'personal_training', duration: 180, price: 208 },
+  { type: 'personal_training', duration: 365, price: 375 },
+  
+  { type: 'standard', duration: 30, price: 25 },
+  { type: 'standard', duration: 90, price: 63 },
+  { type: 'standard', duration: 180, price: 113 },
+  { type: 'standard', duration: 365, price: 208 },
+  
+  { type: 'vip', duration: 30, price: 84 },
+  { type: 'vip', duration: 90, price: 229 },
+  { type: 'vip', duration: 180, price: 417 },
+  { type: 'vip', duration: 365, price: 750 },
+];
+
 export default function MembershipPackagesPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [packages, setPackages] = useState<MembershipPackage[]>([
-    {
-      id: 1,
-      name: "Basic Membership",
-      price: 29.99,
-      duration: "1 month",
-      type: "Gym Access",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Premium Membership",
-      price: 49.99,
-      duration: "1 month",
-      type: "Full Access",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Annual Basic",
-      price: 299.99,
-      duration: "12 months",
-      type: "Gym Access",
-      status: "active",
-    },
-    {
-      id: 4,
-      name: "Annual Premium",
-      price: 499.99,
-      duration: "12 months",
-      type: "Full Access",
-      status: "active",
-    },
-    {
-      id: 5,
-      name: "Student Membership",
-      price: 19.99,
-      duration: "1 month",
-      type: "Gym Access",
-      status: "active",
-    },
-    {
-      id: 6,
-      name: "Family Package",
-      price: 79.99,
-      duration: "1 month",
-      type: "Full Access",
-      status: "active",
-    },
-  ])
+  const [packages, setPackages] = useState<MembershipPackage[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [currentPackage, setCurrentPackage] = useState<MembershipPackage | null>(null)
-  const [newPackage, setNewPackage] = useState<Partial<MembershipPackage>>({
-    name: "",
-    price: 0,
-    duration: "1 month",
-    type: "Gym Access",
-    status: "active",
-  })
+  // API functions
+  const fetchMemberships = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Tạo tất cả 12 gói từ validMemberships với giá trị mặc định
+      const allPackages = validMemberships.map((pkg, index) => ({
+        id: index + 1,
+        type: pkg.type,
+        duration: pkg.duration,
+        price: pkg.price,
+        registeredCount: 0, // Mặc định là 0
+        status: "active" as const
+      }))
+
+      try {
+        // Thử lấy dữ liệu từ API để cập nhật số người đăng ký
+        const response = await fetch('http://localhost:5000/api/membership')
+        
+        if (response.ok) {
+          const result = await response.json()
+          
+          if (result.success && Array.isArray(result.data)) {
+            // Gộp dữ liệu API với danh sách gói đầy đủ
+            const mergedPackages = allPackages.map(pkg => {
+              // Tìm gói tương ứng trong dữ liệu API
+              const apiData = result.data.find((item: any) => 
+                item.type === pkg.type && 
+                item.duration === pkg.duration && 
+                item.price === pkg.price
+              )
+              
+              return {
+                ...pkg,
+                registeredCount: apiData?.registeredCount || 0,
+                status: apiData?.status || "active"
+              }
+            })
+            
+            setPackages(mergedPackages)
+          } else {
+            // Nếu API response không hợp lệ, dùng gói mặc định
+            setPackages(allPackages)
+          }
+        } else {
+          // Nếu API call thất bại, dùng gói mặc định
+          console.warn('API call failed, using default packages')
+          setPackages(allPackages)
+        }
+      } catch (apiError) {
+        // Nếu API không khả dụng, dùng gói mặc định
+        console.warn('API not available, using default packages:', apiError)
+        setPackages(allPackages)
+        setError(null) // Không hiển thị lỗi cho việc API không khả dụng
+      }
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Lỗi không xác định')
+      console.error('Error in fetchMemberships:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchMemberships()
+  }, [])
 
   // Filter packages based on search term
   const filteredPackages = packages.filter(
     (pkg) =>
-      pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       pkg.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pkg.duration.toLowerCase().includes(searchTerm.toLowerCase()),
+      pkg.duration.toString().includes(searchTerm.toLowerCase()) ||
+      pkg.price.toString().includes(searchTerm.toLowerCase())
   )
-
-  // Handle adding a new package
-  const handleAddPackage = () => {
-    if (!newPackage.name || !newPackage.price) return
-
-    const packageToAdd: MembershipPackage = {
-      id: packages.length > 0 ? Math.max(...packages.map((p) => p.id)) + 1 : 1,
-      name: newPackage.name || "",
-      price: Number(newPackage.price) || 0,
-      duration: newPackage.duration || "1 month",
-      type: newPackage.type || "Gym Access",
-      status: (newPackage.status as "active" | "inactive") || "active",
-    }
-
-    setPackages([...packages, packageToAdd])
-    setNewPackage({
-      name: "",
-      price: 0,
-      duration: "1 month",
-      type: "Gym Access",
-      status: "active",
-    })
-    setIsAddDialogOpen(false)
-  }
-
-  // Handle editing a package
-  const handleEditPackage = () => {
-    if (!currentPackage) return
-
-    const updatedPackages = packages.map((pkg) => (pkg.id === currentPackage.id ? currentPackage : pkg))
-    setPackages(updatedPackages)
-    setIsEditDialogOpen(false)
-  }
-
-  // Handle deleting a package
-  const handleDeletePackage = () => {
-    if (!currentPackage) return
-
-    const updatedPackages = packages.filter((pkg) => pkg.id !== currentPackage.id)
-    setPackages(updatedPackages)
-    setIsDeleteDialogOpen(false)
-  }
 
   // Format price to currency
   const formatPrice = (price: number) => {
@@ -142,19 +126,67 @@ export default function MembershipPackagesPage() {
     }).format(price)
   }
 
+  // Format type display
+  const formatType = (type: string) => {
+    switch (type) {
+      case 'personal_training':
+        return 'Personal Training'
+      case 'standard':
+        return 'Standard'
+      case 'vip':
+        return 'VIP'
+      default:
+        return type.charAt(0).toUpperCase() + type.slice(1)
+    }
+  }
+
+  // Format duration display
+  const formatDuration = (duration: number) => {
+    if (duration < 30) return `${duration} days`
+    if (duration === 30) return '1 month'
+    if (duration === 90) return '3 months'
+    if (duration === 180) return '6 months'
+    if (duration === 365) return '1 year'
+    return `${duration} days`
+  }
+
+  // Get card color based on type
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'personal_training':
+        return 'border-l-4 border-l-purple-500'
+      case 'standard':
+        return 'border-l-4 border-l-blue-500'
+      case 'vip':
+        return 'border-l-4 border-l-yellow-500'
+      default:
+        return 'border-l-4 border-l-gray-500'
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Membership Packages</h1>
-        <Button onClick={() => setIsAddDialogOpen(true)} className="bg-[#1a1a6c]">
-          <Plus className="mr-2 h-4 w-4" /> Add Package
-        </Button>
+        <div>
+          <h1 className="text-2xl font-bold">Gói Tập Gym</h1>
+          {loading && <p className="text-sm text-gray-500 mt-1">Đang tải dữ liệu...</p>}
+          {error && <p className="text-sm text-red-500 mt-1">Lỗi: {error}</p>}
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={fetchMemberships} 
+            variant="outline"
+            disabled={loading}
+          >
+            {loading ? "Đang tải..." : "Làm mới"}
+          </Button>
+        </div>
       </div>
 
       <div className="flex justify-between mb-6">
         <div className="relative w-full max-w-sm">
           <Input
-            placeholder="Search packages..."
+            placeholder="Tìm kiếm gói tập..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -163,261 +195,74 @@ export default function MembershipPackagesPage() {
         </div>
       </div>
 
-      {filteredPackages.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">No packages found</div>
+      {loading ? (
+        <div className="text-center py-20">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-500">Đang tải dữ liệu...</p>
+        </div>
+      ) : error ? (
+        <div className="text-center py-20">
+          <p className="text-red-500 mb-4">Lỗi kết nối: {error}</p>
+          <Button onClick={fetchMemberships} variant="outline">
+            Thử lại
+          </Button>
+        </div>
+      ) : filteredPackages.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          {searchTerm ? "Không tìm thấy gói tập nào phù hợp" : "Không có dữ liệu gói tập"}
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredPackages.map((pkg) => (
-            <Card key={pkg.id} className="flex flex-col">
+            <Card key={pkg.id} className={`flex flex-col ${getTypeColor(pkg.type)} hover:shadow-lg transition-shadow`}>
               <CardContent className="pt-6 flex-grow">
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-bold text-lg">{pkg.name}</h3>
-                    <p className="text-2xl font-bold text-[#1a1a6c] mt-2">{formatPrice(pkg.price)}</p>
-                    <p className="text-gray-500 text-sm">{pkg.duration}</p>
+                    <h3 className="font-bold text-lg text-gray-800">{formatType(pkg.type)}</h3>
+                    <p className="text-2xl font-bold text-blue-600 mt-2">{formatPrice(pkg.price)}</p>
+                    <p className="text-gray-500 text-sm">{formatDuration(pkg.duration)}</p>
                   </div>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${
                       pkg.status === "active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {pkg.status === "active" ? "Active" : "Inactive"}
+                    {pkg.status === "active" ? "Hoạt động" : "Tạm dừng"}
                   </span>
                 </div>
-                <div className="mt-4">
-                  <p className="text-sm font-medium">Type: {pkg.type}</p>
+                
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Users className="h-4 w-4 mr-2" />
+                      <span>Đã đăng ký</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`font-semibold text-lg ${pkg.registeredCount === 0 ? 'text-gray-400' : 'text-blue-600'}`}>
+                        {pkg.registeredCount}
+                      </span>
+                      {pkg.registeredCount === 0 && (
+                        <p className="text-xs text-gray-400">Chưa có đăng ký</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div>
+                    <span className="font-medium">Thời hạn:</span>
+                    <p>{pkg.duration} ngày</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Loại:</span>
+                    <p>{formatType(pkg.type)}</p>
+                  </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-end gap-2 pt-2 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setCurrentPackage(pkg)
-                    setIsEditDialogOpen(true)
-                  }}
-                >
-                  <Edit className="h-4 w-4 mr-1" /> Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => {
-                    setCurrentPackage(pkg)
-                    setIsDeleteDialogOpen(true)
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" /> Delete
-                </Button>
-              </CardFooter>
             </Card>
           ))}
         </div>
       )}
-
-      {/* Add Package Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Membership Package</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="name">Package Name</Label>
-              <Input
-                id="name"
-                value={newPackage.name || ""}
-                onChange={(e) => setNewPackage({ ...newPackage, name: e.target.value })}
-                placeholder="e.g. Basic Membership"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={newPackage.price || ""}
-                onChange={(e) => setNewPackage({ ...newPackage, price: Number.parseFloat(e.target.value) })}
-                placeholder="e.g. 29.99"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="duration">Duration</Label>
-              <Select
-                value={newPackage.duration}
-                onValueChange={(value) => setNewPackage({ ...newPackage, duration: value })}
-              >
-                <SelectTrigger id="duration">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1 month">1 Month</SelectItem>
-                  <SelectItem value="3 months">3 Months</SelectItem>
-                  <SelectItem value="6 months">6 Months</SelectItem>
-                  <SelectItem value="12 months">12 Months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="type">Type</Label>
-              <Select value={newPackage.type} onValueChange={(value) => setNewPackage({ ...newPackage, type: value })}>
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Gym Access">Gym Access</SelectItem>
-                  <SelectItem value="Full Access">Full Access</SelectItem>
-                  <SelectItem value="Classes Only">Classes Only</SelectItem>
-                  <SelectItem value="Personal Training">Personal Training</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={newPackage.status}
-                onValueChange={(value: "active" | "inactive") => setNewPackage({ ...newPackage, status: value })}
-              >
-                <SelectTrigger id="status">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddPackage}>Add Package</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Package Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Membership Package</DialogTitle>
-          </DialogHeader>
-
-          {currentPackage && (
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-name">Package Name</Label>
-                <Input
-                  id="edit-name"
-                  value={currentPackage.name}
-                  onChange={(e) => setCurrentPackage({ ...currentPackage, name: e.target.value })}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-price">Price</Label>
-                <Input
-                  id="edit-price"
-                  type="number"
-                  step="0.01"
-                  value={currentPackage.price}
-                  onChange={(e) => setCurrentPackage({ ...currentPackage, price: Number.parseFloat(e.target.value) })}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-duration">Duration</Label>
-                <Select
-                  value={currentPackage.duration}
-                  onValueChange={(value) => setCurrentPackage({ ...currentPackage, duration: value })}
-                >
-                  <SelectTrigger id="edit-duration">
-                    <SelectValue placeholder="Select duration" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1 month">1 Month</SelectItem>
-                    <SelectItem value="3 months">3 Months</SelectItem>
-                    <SelectItem value="6 months">6 Months</SelectItem>
-                    <SelectItem value="12 months">12 Months</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-type">Type</Label>
-                <Select
-                  value={currentPackage.type}
-                  onValueChange={(value) => setCurrentPackage({ ...currentPackage, type: value })}
-                >
-                  <SelectTrigger id="edit-type">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Gym Access">Gym Access</SelectItem>
-                    <SelectItem value="Full Access">Full Access</SelectItem>
-                    <SelectItem value="Classes Only">Classes Only</SelectItem>
-                    <SelectItem value="Personal Training">Personal Training</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="edit-status">Status</Label>
-                <Select
-                  value={currentPackage.status}
-                  onValueChange={(value: "active" | "inactive") =>
-                    setCurrentPackage({ ...currentPackage, status: value })
-                  }
-                >
-                  <SelectTrigger id="edit-status">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleEditPackage}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Package</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p>Are you sure you want to delete the "{currentPackage?.name}" package? This action cannot be undone.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleDeletePackage}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

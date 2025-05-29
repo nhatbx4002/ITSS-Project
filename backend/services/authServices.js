@@ -1,6 +1,14 @@
 const User = require('../models/usersModel');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const { google } = require('googleapis');
+
+const googleOauthClient = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+);
+
 
 
 const authServices = {
@@ -11,6 +19,8 @@ const authServices = {
         if (existingUser) {
            throw new Error(`Email đã được sử dụng !`);
         }
+        const checkPhone = await User.findOne({ phone });
+        if(checkPhone)throw new Error (`Số điện thoại đã được sử dụng !`);
 
         // Kiểm tra mật khẩu và xác nhận mật khẩu
         if (password !== confirm_password) {
@@ -28,7 +38,7 @@ const authServices = {
             password_hash: hashedPassword,
             phone,
             birthdate,
-            role : role || 'member'
+            role
         });
 
         await user.save();
@@ -56,10 +66,7 @@ const authServices = {
             { expiresIn: '24h' }
         );
 
-        console.log('Generated token:', token); // Debug log
-        console.log('Token length:', token.length); // Debug log
-
-        return token;
+        return {user, token};
     },
 
     ChangePassword: async ({ userId, currentPassword, newPassword, confirmNewPassword }) => {
@@ -88,7 +95,41 @@ const authServices = {
         await user.save();
 
         return;
-    }
+    },
+
+    GoogleLogin: async ({ idToken }) => {
+        const ticket = await googleOauthClient.verifyIdToken({
+          idToken,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const email = payload.email;
+        const name = payload.name;
+        const googleId = payload.sub;
+        const image = payload.picture;
+
+        let user = await User.findOne({ $or: [{ email }, { googleId }] });
+  
+        if (!user) {
+          user = new User({
+            full_name: name,
+            email: email,
+            password_hash: bcrypt.hashSync(crypto.randomUUID(), 10),
+            googleId: googleId,
+            role: 'member', 
+            image: image,
+          });
+          await user.save();
+        }
+  
+        const token = jwt.sign(
+          { userId: user._id },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+  
+        return {user, token};
+    },
 }
 
 module.exports = authServices;

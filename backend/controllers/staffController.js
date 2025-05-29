@@ -4,9 +4,10 @@ const StaffService = require('../services/staffService')
 class StaffControllers {
     async getAllMembers(req, res) {
   try {
+   
     const searchTerm = req.query.search || ''; // lấy search từ query param, nếu không có thì là ''
     const listMembers = await StaffService.getAllMembers(searchTerm);
-
+     console.log('Received request to getAllMembers with query:', req.query);
     res.status(200).json({
       success: true,
       message: "Get all members successfully",

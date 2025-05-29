@@ -17,3 +17,4 @@ const connectDB = async () => {
 module.exports = {
     connectDB
 }; 
+//mongodb+srv://nhatdayne:<db_password>@gymmanagementsystemdb.wfhdx4p.mongodb.net/?retryWrites=true&w=majority&appName=GymManagementSystemDb

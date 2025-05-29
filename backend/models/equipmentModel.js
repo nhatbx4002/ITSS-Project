@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 
 const EquipmentSchema = new mongoose.Schema({
-  gym_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Gym', required: true },
   name: { type: String, required: true, maxlength: 100 },
   purchase_date: { type: Date },
   warranty_until: { type: Date },
-  status: { type: String, enum: ['working', 'maintenance', 'broken'], default: 'working' }
+  quantity: {
+    working: { type: Number, default: 0 },
+    maintenance: { type: Number, default: 0 },
+    broken: { type: Number, default: 0 }
+  }
 });
 
 module.exports = mongoose.model('Equipment', EquipmentSchema);

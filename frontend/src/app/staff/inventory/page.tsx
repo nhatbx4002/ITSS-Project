@@ -1,178 +1,288 @@
 "use client"
 
-import { useState } from "react"
-import { Search, ArrowUpDown, Camera } from "lucide-react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import EquipmentForm from "./EquipmentForm"
+import EquipmentTable from "./EquipmentTable"
 
 type Equipment = {
-  id: number
+  id: string
   name: string
-  total: number
-  status: "Active" | "Inactive"
+  purchase_date: string
+  warranty_until: string
+  working: number
+  maintenance: number
+  broken: number
+  total?: number
+  status?: string
 }
 
-export default function InventoryPage() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [entriesPerPage, setEntriesPerPage] = useState("10")
+type EquipmentFormData = Omit<Equipment, "id">
 
-  const equipments: Equipment[] = [
-    { id: 1, name: "Treadmill", total: 1, status: "Active" },
-    { id: 2, name: "10 lbs Dumbbell", total: 3, status: "Inactive" },
-    { id: 3, name: "5 lbs Dumbbell", total: 6, status: "Active" },
-    { id: 4, name: "20 lbs Dumbbell", total: 12, status: "Active" },
-  ]
+export default function InventoryPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [equipments, setEquipments] = useState<Equipment[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [editingEquipment, setEditingEquipment] = useState<Equipment | null>(null)
+
+  // Hàm gọi API để lấy dữ liệu equipment
+  const fetchEquipments = async (searchName = "") => {
+    setLoading(true)
+    setError("")
+    
+    try {
+      const url = searchName 
+        ? `http://localhost:5000/api/equipment?name=${encodeURIComponent(searchName)}`
+        : `http://localhost:5000/api/equipment`
+      
+      const response = await fetch(url)
+      const result = await response.json()
+      
+      console.log("API Response:", result)
+      
+      if (result.success) {
+        // Map dữ liệu từ API response đúng với cấu trúc thực tế
+        const mappedData = result.data.map((item: any) => ({
+          id: item._id,
+          name: item.name,
+          purchase_date: item.purchase_date ? item.purchase_date.split('T')[0] : '',
+          warranty_until: item.warranty_until ? item.warranty_until.split('T')[0] : '',
+          working: item.quantity?.working || 0,
+          maintenance: item.quantity?.maintenance || 0,
+          broken: item.quantity?.broken || 0,
+          total: item.total,
+          status: item.status
+        }))
+        setEquipments(mappedData)
+      } else {
+        setError("Failed to fetch equipments")
+      }
+    } catch (err) {
+      setError("Error connecting to server")
+      console.error("Error fetching equipments:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Hàm tạo equipment mới
+  const createEquipment = async (formData: EquipmentFormData) => {
+    try {
+      const requestData = {
+        name: formData.name,
+        purchase_date: formData.purchase_date,
+        warranty_until: formData.warranty_until,
+        quantity: {
+          working: formData.working,
+          maintenance: formData.maintenance,
+          broken: formData.broken
+        }
+      }
+
+      const response = await fetch('http://localhost:5000/api/equipment/createEquipment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to create equipment')
+      }
+
+      if (result.success) {
+        // Refresh danh sách equipment sau khi tạo thành công
+        await fetchEquipments()
+        return result.data
+      } else {
+        throw new Error(result.message || 'Failed to create equipment')
+      }
+    } catch (err) {
+      console.error("Error creating equipment:", err)
+      throw err
+    }
+  }
+
+  // Hàm update equipment (nếu bạn có API update)
+  const updateEquipment = async (id: string, formData: EquipmentFormData) => {
+    try {
+      const requestData = {
+        name: formData.name,
+        purchase_date: formData.purchase_date,
+        warranty_until: formData.warranty_until,
+        quantity: {
+          working: formData.working,
+          maintenance: formData.maintenance,
+          broken: formData.broken
+        }
+      }
+
+      const response = await fetch(`http://localhost:5000/api/equipment/updateEquipment/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to update equipment')
+      }
+
+      if (result.success) {
+        // Refresh danh sách equipment sau khi update thành công
+        await fetchEquipments()
+        return result.data
+      } else {
+        throw new Error(result.message || 'Failed to update equipment')
+      }
+    } catch (err) {
+      console.error("Error updating equipment:", err)
+      throw err
+    }
+  }
+
+  // Load dữ liệu khi component mount
+  useEffect(() => {
+    fetchEquipments()
+  }, [])
+
+  // Debounce search để tránh gọi API quá nhiều
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchEquipments(searchTerm)
+    }, 500) // Chờ 500ms sau khi user ngừng gõ
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  const openAddModal = () => {
+    setEditingEquipment(null)
+    setIsModalOpen(true)
+  }
+
+  const openEditModal = (equipment: Equipment) => {
+    setEditingEquipment(equipment)
+    setIsModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingEquipment(null)
+  }
+
+  const handleSaveEquipment = async (formData: EquipmentFormData) => {
+    try {
+      setLoading(true)
+      setError("")
+
+      if (editingEquipment) {
+        // Update existing equipment - sử dụng ID từ editingEquipment
+        console.log("Updating equipment with ID:", editingEquipment.id)
+        await updateEquipment(editingEquipment.id, formData)
+      } else {
+        // Create new equipment
+        console.log("Creating new equipment")
+        await createEquipment(formData)
+      }
+
+      // Đóng modal sau khi thành công
+      setIsModalOpen(false)
+      setEditingEquipment(null)
+      
+    } catch (err: any) {
+      // Hiển thị lỗi cho user
+      setError(err.message || "An error occurred while saving equipment")
+      alert(err.message || "An error occurred while saving equipment")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const deleteEquipment = async (id: string) => {
+    try {
+      setLoading(true)
+      setError("")
+      
+      console.log("Deleting equipment with ID:", id)
+
+      const response = await fetch(`http://localhost:5000/api/equipment/deleteEquipment/${id}`, {
+        method: 'DELETE',
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete equipment')
+      }
+
+      if (result.success) {
+        // Refresh danh sách equipment sau khi xóa thành công
+        await fetchEquipments()
+      } else {
+        throw new Error(result.message || 'Failed to delete equipment')
+      }
+    } catch (err: any) {
+      console.error("Error deleting equipment:", err)
+      setError(err.message || "An error occurred while deleting equipment")
+      alert(err.message || "An error occurred while deleting equipment")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }
+
+  // Prepare form initial data for editing
+  const getFormInitialData = (): EquipmentFormData | undefined => {
+    if (!editingEquipment) return undefined
+    
+    return {
+      name: editingEquipment.name,
+      purchase_date: editingEquipment.purchase_date,
+      warranty_until: editingEquipment.warranty_until,
+      working: editingEquipment.working,
+      maintenance: editingEquipment.maintenance,
+      broken: editingEquipment.broken,
+    }
+  }
 
   return (
-    <div className="p-0">
-      {/* Add Equipment Button */}
-      <div className="p-4">
-        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-white text-[#1a1a6c] hover:bg-gray-100 border border-gray-200 cursor-pointer">Add Equipment</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] p-0 border-none">
-            <div className="bg-white rounded-lg p-6">
-              <DialogTitle className="text-xl font-bold text-[#1a1a6c] mb-4">Add Equipment</DialogTitle>
+    <div className="p-4">
+      <Button
+        className="mb-4 bg-white text-[#1a1a6c] hover:bg-gray-100 border border-gray-200 cursor-pointer"
+        onClick={openAddModal}
+        disabled={loading}
+      >
+        Add Equipment
+      </Button>
 
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <span className="text-sm text-blue-600">Attach Photo</span>
-                  <Camera className="w-4 h-4 ml-1 text-blue-600" />
-                </div>
+      <EquipmentForm
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSave={handleSaveEquipment}
+        initialData={getFormInitialData()}
+        isEditing={!!editingEquipment}
+      />
 
-                <div className="space-y-2">
-                  <label htmlFor="equipment-name" className="block text-sm font-medium">
-                    Equipment Name
-                  </label>
-                  <Input id="equipment-name" className="bg-gray-200 border-none" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label htmlFor="status" className="block text-sm font-medium">
-                      Status
-                    </label>
-                    <Select>
-                      <SelectTrigger className="bg-gray-200 border-none">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label htmlFor="total-no" className="block text-sm font-medium">
-                      Total No.
-                    </label>
-                    <Input id="total-no" type="number" className="bg-gray-200 border-none" />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-2 mt-6">
-                  <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="border-gray-300 cursor-pointer">
-                    Cancel
-                  </Button>
-                  <Button className="bg-yellow-500 hover:bg-yellow-600 text-black cursor-pointer">Save Changes</Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Manage Equipments Section */}
-      <div className="bg-[#7a7aaa] rounded-lg mx-4 p-6">
-        <h2 className="text-xl font-semibold text-white mb-4">Manage Equipments</h2>
-
-        <div className="flex justify-between mb-6">
-          <div className="flex items-center">
-            <span className="text-white text-sm mr-2">Show Entries</span>
-            <div className="relative">
-              <Select value={entriesPerPage} onValueChange={setEntriesPerPage}>
-                <SelectTrigger className="bg-[#6a6a93] text-white border-none w-16">
-                  <SelectValue>{entriesPerPage}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-[#6a6a93] text-white placeholder:text-gray-300 border-none w-64"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-300" />
-          </div>
-        </div>
-
-        {/* Equipment Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-white">
-            <thead>
-              <tr className="text-left">
-                <th className="py-2 px-4 font-medium">
-                  <div className="flex items-center">
-                    <span>Equipment Name</span>
-                    <ArrowUpDown className="ml-1 h-4 w-4" />
-                  </div>
-                </th>
-                <th className="py-2 px-4 font-medium">Total no.</th>
-                <th className="py-2 px-4 font-medium">
-                  <div className="flex items-center">
-                    <span>Status</span>
-                    <ArrowUpDown className="ml-1 h-4 w-4" />
-                  </div>
-                </th>
-                <th className="py-2 px-4 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {equipments.map((equipment) => (
-                <tr key={equipment.id} className="border-t border-[#6a6a93]">
-                  <td className="py-3 px-4">{equipment.name}</td>
-                  <td className="py-3 px-4">{equipment.total}</td>
-                  <td className="py-3 px-4">{equipment.status}</td>
-                  <td className="py-3 px-4 text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="bg-white text-[#1a1a6c] hover:bg-gray-100 border-none cursor-pointer"
-                    >
-                      Edit
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-end mt-6 space-x-2">
-          <Button variant="outline" size="sm" className="bg-[#6a6a93] text-white hover:bg-[#5a5a83] border-none cursor-pointer">
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" className="bg-[#6a6a93] text-white hover:bg-[#5a5a83] border-none cursor-pointer">
-            Next
-          </Button>
-        </div>
-      </div>
+      <EquipmentTable
+        equipments={equipments}
+        loading={loading}
+        error={error}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onEdit={openEditModal}
+        onDelete={deleteEquipment}
+      />
     </div>
   )
 }

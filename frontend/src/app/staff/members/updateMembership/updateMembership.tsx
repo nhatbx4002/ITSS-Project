@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./updateMembership.module.css";
 import { useRouter, usePathname } from "next/navigation";
+import { toast } from 'react-toastify';
 
 interface Member {
   _id?: string;
@@ -18,20 +19,20 @@ interface Member {
 }
 
 const validMemberships = [
-  { type: "vip", duration: 30, price: 42 },
-  { type: "vip", duration: 90, price: 113 },
-  { type: "vip", duration: 180, price: 208 },
-  { type: "vip", duration: 365, price: 375 },
+    { type: 'personal_training', duration: 30, price: 42 },
+    { type: 'personal_training', duration: 90, price: 113 },
+    { type: 'personal_training', duration: 180, price: 208 },
+    { type: 'personal_training', duration: 365, price: 375 },
 
-  { type: "standard", duration: 30, price: 25 },
-  { type: "standard", duration: 90, price: 63 },
-  { type: "standard", duration: 180, price: 113 },
-  { type: "standard", duration: 365, price: 208 },
+    { type: 'standard', duration: 30, price: 25 },
+    { type: 'standard', duration: 90, price: 63 },
+    { type: 'standard', duration: 180, price: 113 },
+    { type: 'standard', duration: 365, price: 208 },
 
-  { type: "personal_training", duration: 30, price: 84 },
-  { type: "personal_training", duration: 90, price: 229 },
-  { type: "personal_training", duration: 180, price: 417 },
-  { type: "personal_training", duration: 365, price: 750 },
+    { type: 'vip', duration: 30, price: 84 },
+    { type: 'vip', duration: 90, price: 229 },
+    { type: 'vip', duration: 180, price: 417 },
+    { type: 'vip', duration: 365, price: 750 },
 ];
 
 const UpdateMembership = ({ 
@@ -81,6 +82,7 @@ const UpdateMembership = ({
       
       setFormData({
         name: membership.name || "",
+
         type: membership.type || "standard",
         duration: membership.duration ? membership.duration.toString() : "30",
         price: membership.price ? membership.price.toString() : "25",
@@ -149,46 +151,48 @@ const UpdateMembership = ({
 
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleUpdate = async () => {
-    try {
-      if (!userId) {
-        throw new Error("Không tìm thấy ID người dùng để cập nhật membership");
-      }
-      
-      console.log("Đang cập nhật membership cho userId:", userId);
-
-      const res = await fetch(`http://localhost:5000/api/staff/subscriptions/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          type: formData.type,
-          duration: Number(formData.duration),
-          price: Number(formData.price),
-          status: formData.status,
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Không thể cập nhật membership");
-      }
-
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
-
-      if (onClose) {
-        onClose(); // Đóng modal nếu được cung cấp hàm onClose
-      } else {
-        router.back(); // Quay lại nếu không có hàm onClose
-      }
-    } catch (error: any) {
-      alert("Lỗi khi cập nhật membership: " + error.message);
-      console.error(error);
+ const handleUpdate = async () => {
+  try {
+    if (!userId) {
+      throw new Error("Không tìm thấy ID người dùng để cập nhật membership");
     }
-  };
+
+    console.log("Đang cập nhật membership cho userId:", userId);
+
+    const res = await fetch(`http://localhost:5000/api/staff/subscriptions/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        type: formData.type,
+        duration: Number(formData.duration),
+        price: Number(formData.price),
+        status: formData.status,
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || "Không thể cập nhật membership");
+    }
+
+    toast.success("🎉 Cập nhật membership thành công!");
+
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+
+    if (onClose) {
+      onClose(); // Đóng modal nếu được cung cấp hàm onClose
+    } else {
+      router.back(); // Quay lại nếu không có hàm onClose
+    }
+  } catch (error: any) {
+    toast.error("❌ Lỗi khi cập nhật membership: " + error.message);
+    console.error(error);
+  }
+};
 
   return (
     <div className={styles["form-container"]}>
