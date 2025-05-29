@@ -16,4 +16,7 @@ router.post('/:userId/subscriptions', memberController.createSubscription);
 // Xem danh sách gói tập
 router.get('/:userId/subscriptions', memberController.getSubscriptions);
 
+
 module.exports = router;
+
+
